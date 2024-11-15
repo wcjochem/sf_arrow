@@ -164,6 +164,12 @@ st_read_parquet <- function(dsn, col_select = NULL,
   }
 
   if(!is.null(props)){ warning("'props' is deprecated in `arrow`. See arrow::ParquetFileWriter.") }
+  
+  if (is.character(dsn)) {
+    dsn <- arrow:::make_readable_file(dsn)
+    on.exit(dsn$close())
+  }
+  
 
   pq <- arrow::ParquetFileReader$create(dsn, ...)
   schema <- pq$GetSchema()
@@ -224,7 +230,12 @@ st_read_feather <- function(dsn, col_select = NULL, ...){
   if(missing(dsn)){
     stop("Please provide a data source")
   }
-
+  
+  if (is.character(dsn)) {
+    dsn <- arrow:::make_readable_file(dsn)
+    on.exit(dsn$close())
+  }
+  
   f <- arrow::read_feather(dsn, col_select, as_data_frame = FALSE, ...)
   schema <- f$schema
   metadata <- schema$metadata
